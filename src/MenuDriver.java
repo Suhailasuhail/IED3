@@ -356,28 +356,57 @@ public class MenuDriver {
         }
     }
 
-
-
     // ===== Option 5 (YOU implement): export TOP-N most expensive =====
-
-    /**
-     * TODO: Implement this method.
-     * Requirements recap:
-     *  - Prompt for N; validate 1 <= N <= books.size(); reprompt on bad input.
-     *  - Make a COPY of the list, sort by price DESC, take first N.
-     *  - Write to src/data/reports/topN.txt (e.g., top5.txt) with:
-     *      • Numbered list: Title, Author, Price (aligned)
-     *      • "Top-N total value: $XX.XX"
-     *      • "Average of top N: $YY.YY"
-     *  - Print a friendly console message when done.
-     */
     private static void exportTopN(ArrayList<Books> books, Scanner sc) {
-        // TODO: Your code here.
-        // HINTS:
-        //   • Read/validate N with a loop (similar to readInt but with range checks).
-        //   • new ArrayList<>(books) gives you a shallow copy to sort.
-        //   • Comparator: (a, b) -> Double.compare(b.getPrice(), a.getPrice())
-        //   • Path out = Paths.get(REPORTS_DIR, "top" + N + ".txt")
+        if (books.isEmpty()) {
+            System.out.println("No data loaded.");return;
+        }
+
+        int n; while (true) {
+            System.out.print("Enter N (1-" + books.size() + "): ");
+            String input = sc.nextLine().trim();
+
+            try { n = Integer.parseInt(input);
+                if (n >= 1 && n <= books.size()) {
+                    break;
+                }
+                System.out.println("Please enter a number between 1 and " + books.size() + ".");
+            } catch (NumberFormatException e) {
+                System.out.println("Invalid input. Please enter a whole number.");
+            }
+        }
+
+        ArrayList<Books> sortedBooks = new ArrayList<>(books);
+        Collections.sort(sortedBooks, new Comparator<Books>() {
+            @Override
+            public int compare(Books first, Books second) {
+                return Double.compare(second.getPrice(), first.getPrice());
+            }
+        });
+
+        Path outPath = Paths.get(REPORTS_DIR, "top" + n + ".txt");
+        double total = 0.0;
+
+        try (PrintWriter out = new PrintWriter(Files.newBufferedWriter(outPath))) {
+
+            out.printf("Top %d Most Expensive Books%n", n);
+            out.println("****************");
+            out.printf("%-4s %-30.30s %-22.22s %10s%n", "No.", "Title", "Author", "Price");
+            out.println("*****************");
+
+            for (int i = 0; i < n; i++) {Books book = sortedBooks.get(i);total += book.getPrice();
+                out.printf("%-4d %-30.30s %-22.22s $%9.2f%n", i + 1, book.getTitle(), book.getAuthor(), book.getPrice()); }
+
+            double average = total / n;
+
+            out.println("******************");
+            out.printf("Top-%d total value: $%.2f%n", n, total);
+            out.printf("Average of top %d: $%.2f%n", n, average);
+
+            System.out.println("Saved: " + outPath);}
+        catch (IOException e) {
+            System.out.println("Error writing " + outPath + ": " + e.getMessage());
+        }
     }
 
     // ===== Option 6 (YOU implement): export PRICE STATS =====
