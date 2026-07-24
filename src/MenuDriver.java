@@ -398,7 +398,6 @@ public class MenuDriver {
                 out.printf("%-4d %-30.30s %-22.22s $%9.2f%n", i + 1, book.getTitle(), book.getAuthor(), book.getPrice()); }
 
             double average = total / n;
-
             out.println("******************");
             out.printf("Top-%d total value: $%.2f%n", n, total);
             out.printf("Average of top %d: $%.2f%n", n, average);
@@ -410,23 +409,39 @@ public class MenuDriver {
     }
 
     // ===== Option 6 (YOU implement): export PRICE STATS =====
+    private static void exportPriceStats(ArrayList<Books> books){
+        if (books.isEmpty()) {
+            System.out.println("No data loaded.");
+            return;
+        }
 
-    /**
-     * TODO: Implement this method.
-     * Requirements recap:
-     *  - Compute Count, Min, Max, Average, Median across ALL books.
-     *    • Median: sort the prices; for even count, average the middle two.
-     *  - Write to src/data/reports/price_stats.txt with two-decimal formatting.
-     *  - Print a friendly console message when done.
-     */
-    private static void exportPriceStats(ArrayList<Books> books) {
-        // TODO: Your code here.
-        // HINTS:
-        //   • Collect prices into ArrayList<Double> and Collections.sort ascending.
-        //   • Use printf or String.format("%.2f", value) for two decimals.
-        //   • Path out = Paths.get(REPORTS_DIR, "price_stats.txt")
+        ArrayList<Double> prices = new ArrayList<>();
+        double total = 0.0;
+
+        for (Books book : books) {prices.add(book.getPrice());total += book.getPrice();
+        }
+        Collections.sort(prices);
+        int count = prices.size();double min = prices.get(0);double max = prices.get(count - 1);double average = total / count;double median;
+        if (count % 2 == 1) {
+            median = prices.get(count / 2);
+        } else {int upperMiddle = count / 2;
+            int lowerMiddle = upperMiddle - 1;
+
+            median = (prices.get(lowerMiddle) + prices.get(upperMiddle)) / 2.0;}
+        Path outPath = Paths.get(REPORTS_DIR, "price_stats.txt");
+        try (PrintWriter out = new PrintWriter(Files.newBufferedWriter(outPath))) {
+
+            out.println("Book Price Statistics");
+            out.println("********************");
+            out.printf("Count: %d%n", count);
+            out.printf("Min: $%.2f%n", min);
+            out.printf("Max: $%.2f%n", max);
+            out.printf("Average: $%.2f%n", average);
+            out.printf("Median: $%.2f%n", median);
+
+            System.out.println("Saved: " + outPath);
+        } catch (IOException e) {System.out.println("Error writing " + outPath + ": " + e.getMessage());}
     }
-
     // ===== Helper you may reuse in case 4 (dedupe by Title + Author) =====
 
     /** Returns true if list already contains a book with the same Title+Author (case-insensitive). */

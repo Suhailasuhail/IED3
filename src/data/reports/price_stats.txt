@@ -1,0 +1,7 @@
+Book Price Statistics
+********************
+Count: 140
+Min: $16.29
+Max: $119.59
+Average: $67.68
+Median: $69.19
